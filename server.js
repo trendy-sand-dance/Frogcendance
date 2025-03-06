@@ -1,38 +1,36 @@
-// // server.mjs
-// import { createServer } from 'node:http';
-
-// const server = createServer((req, res) => {
-//   res.writeHead(200, { 'Content-Type': 'text/plain' });
-//   res.end('Hello World!\n');
-// });
-
-// // starts a simple http server locally on port 3000
-// server.listen(3000, '127.0.0.1', () => {
-//   console.log('Listening on 127.0.0.1:3000');
-// });
-
-
-// const { createServer } = require('node:http');
-
-// const hostname = '127.0.0.1';
-// const port = 3000;
-
-// const server = createServer((req, res) => {
-//   res.statusCode = 200;
-//   res.setHeader('Content-Type', 'text/plain');
-//   res.end('WIPPhurrfuehsfiehuEEEEEEEE');
-// });
-
-// server.listen(port, hostname, () => {
-//   console.log(`Server running at http://${hostname}:${port}/`);
-// });
+const fastify = require('fastify')({ logger: true }); //call fastify object to use fastify
+const Database = require('better-sqlite3');
+const path = require('path');
+const fs = require('fs');
 
 
 
+//thx claude
+// Create a database file if it doesn't exist
+const dbFile = path.join(__dirname, 'chat.db');
+const db = new Database(dbFile);
+
+
+function initializeDatabase() {
+  // Create messages table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS messages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT NOT NULL,
+      content TEXT NOT NULL,
+      timestamp INTEGER DEFAULT (strftime('%s', 'now'))
+    )
+  `);
+  console.log('Database initialized');
+}
 
 
 
-
+// Add static file serving for the frontend
+fastify.register(require('fastify-static'), {
+  root: path.join(__dirname, 'public'),
+  prefix: '/'
+});
 
 
 
@@ -43,21 +41,35 @@
 
 
 
-// run with `node server.mjs`
 
 
 
-const fastify = require('fastify')({ logger: true });
 
 // Define a basic route
 fastify.get('/', async (request, reply) => {
-  return { hello: 'world' };
+  return { message: 'hoi wereldje blablablalbad' };
 });
+
+fastify.get('/test', basicHTMLpage);
+
+function basicHTMLpage() {
+  return `
+  <html>
+  <head>
+    <title>My whatsupp gamerss</title>
+  </head>
+  <body>
+    <h1>Hello world!</h1>
+  </body>
+  </html>
+  `;
+}
+
 
 // Start the server
 const start = async () => {
   try {
-    await fastify.listen(3000);
+    await fastify.listen({ port: 3000 });
     console.log(`Server running at http://localhost:3000`);
   } catch (err) {
     fastify.log.error(err);
