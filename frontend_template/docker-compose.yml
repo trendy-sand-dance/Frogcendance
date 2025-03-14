@@ -1,0 +1,26 @@
+# docker-compose.yml
+version: '3'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend/data:/app/data
+    environment:
+      - PORT=3001
+    restart: unless-stopped
+
+  chat-frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - BACKEND_URL=http://backend:3001
+    depends_on:
+      - backend
+    restart: unless-stopped
